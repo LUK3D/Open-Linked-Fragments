@@ -2,10 +2,14 @@
   "name": "open-linked-fragments",
   "version": "1.0.0",
   "description": "With this, you can use your github as a cloud storage",
-  "main": "index.js",
+  "main": "./dist/index.js",
+  "module": "ES6",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "node ./src/index.js init"
+    "build": "yarn tsc -p tsconfig.json",
+    "dev": "node ./dist/index.js init"
   },
   "type": "module",
   "repository": {
@@ -31,10 +35,20 @@
     "commander": "^9.3.0",
     "configstore": "^6.0.0",
     "dotenv": "^16.0.1",
+    "each-async": "^2.0.0",
     "figlet": "^1.5.2",
     "glob": "^8.0.3",
+    "indent-string": "^5.0.0",
     "inquirer": "^9.0.0",
     "node-localstorage": "^2.2.1",
     "simple-git": "^3.8.0"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/clear": "^0.1.2",
+    "@types/figlet": "^1.5.4",
+    "@types/inquirer": "^8.2.1",
+    "ts-node": "^10.8.1",
+    "typescript": "^4.7.4"
   }
 }

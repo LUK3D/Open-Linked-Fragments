@@ -46,9 +46,9 @@ if (answer.proceed == "Yes") {
     let response = await create_repository(octokit);
     var finalDestination = await cloneRepo(response, "C:\\Users\\Delfi\\3D Objects");
     // To copy a folder or file  
-    fse.copySync("C:\\Luk3d\\zona\\bin\\tmp\\metafiles\\", finalDestination);
-    updateToWeb(finalDestination);
-    "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";
+    await fse.copySync("C:\\Luk3d\\zona\\bin\\tmp\\metafiles\\", finalDestination);
+    await updateToWeb(finalDestination);
+    "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";
 }
 else {
     //show exit message

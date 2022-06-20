@@ -20,7 +20,10 @@
   ],
   "author": "luk3d",
   "license": "ISC",
- 
+  "bugs": {
+    "url": "https://github.com/LUK3D/Open-Linked-Fragments/issues"
+  },
+  "homepage": "https://github.com/LUK3D/Open-Linked-Fragments#readme",
   "dependencies": {
     "@octokit/rest": "^18.12.0",
     "chalk": "^5.0.1",

@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import child_process from 'child_process';
+import { LocalStorage } from "node-localstorage";
+let localStorage = new LocalStorage('./storage');
 /**
  * ## CREATE REPOSITORY
  * Function Create new Repository
@@ -36,19 +38,34 @@ function create_repository(octokit) {
         console.log("Creating new Repository, please wait");
         let result = yield octokit.repos.createForAuthenticatedUser(reposConfig);
         //----------------------------------------------------------------------
-        console.log(JSON.stringify(result));
-        //----------------------------------------------------------------------
         console.log(`Repository ${chalk.yellow(result.data.full_name)} created successfully!`);
+        return result;
     });
 }
-function cloneRepo(repoExists = false, username = '', repo = '', branch = 'master') {
+/**
+ * ## CLONE THE CREATED REPOSITORY
+ * @param username the owner of the repository
+ * @param repo The repository Name
+ * @param branch
+ * @param destination
+ */
+function cloneRepo(gitResponse, destination = '') {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!repoExists) {
-            yield child_process.execSync(`git clone https://${username}:${process.env.PERSONAL_ACCESS_TOKEN}@github.com/${username}/${repo}.git repos/${username}/${repo}`);
-        }
-        else {
-            child_process.execSync(`cd repos/${username}/${repo} && git pull origin ${branch} --rebase`);
-        }
+        let token = localStorage.getItem('GITHUB_TOKEN');
+        yield child_process.execSync(`git clone https://${gitResponse.data.owner.login}:${token}@github.com/${gitResponse.data.full_name}.git "${destination}/${gitResponse.data.full_name}"`);
+        console.log("DONE!");
+        console.log(`Repository created at: ${destination}/${gitResponse.data.full_name}`);
+        return `${destination}/${gitResponse.data.full_name}`;
     });
 }
-export { create_repository, cloneRepo };
+/**
+ * ## Commit and Push
+
+ */
+function updateToWeb(path = '') {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield child_process.execSync(`cd "${path}" && git add . && git commit -m "🚀New Updates ${Date.now().toLocaleString()}" && git push `);
+        return path;
+    });
+}
+export { create_repository, cloneRepo, updateToWeb };

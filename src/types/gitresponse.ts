@@ -1,4 +1,4 @@
-interface GitEesponse{
+interface GitResponse{
 "status": number,
 "url": string,
 "headers": {
@@ -148,5 +148,5 @@ interface GitEesponse{
 
 
 export{
-    GitEesponse
+    GitResponse
 }

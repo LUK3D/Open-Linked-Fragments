@@ -4,7 +4,7 @@ import clear from 'clear';
 import  figlet from 'figlet';
 import inquirer from 'inquirer';
 import {authenticate} from './auth.js';
-import {cloneRepo, create_repository, updateToWeb} from './git.js';
+import {cloneRepo, create_repository, doFragment, updateToWeb} from './git.js';
 import fse from "fs-extra";
 
 var _app = new app.Command('init')
@@ -26,6 +26,16 @@ clear(); //clears the terminal
 //display app title
 console.log(chalk.greenBright(
 figlet.textSync('Linked Fragments', { horizontalLayout: 'full' })));
+console.log(chalk.greenBright(
+`
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                     Author:Filipe Lukebana (LUK3D)                                          |
+|                                           Date: 19/06/2022                                                  |
+|                                    Email: filipelukebana@gmail.com                                          │
+|                                              Version: 0.1                                                   │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+`
+));
 
 console.log("Welcome to "+ chalk.yellow("Open Linked Fragments"));
 
@@ -44,14 +54,20 @@ if(answer.proceed == "Yes"){
     //proceed with Github authentication
     console.log(chalk.gray("Authenticating..."))
     const octokit = await authenticate(); 
+
+    //Creating Fragments from file
+    await doFragment();
     //Creating new Repository
     let response = await create_repository(octokit);
     var finalDestination = await cloneRepo(response,"C:\\Users\\Delfi\\3D Objects");
     // To copy a folder or file  
     await fse.copySync("C:\\Luk3d\\zona\\bin\\tmp\\metafiles\\", finalDestination);
     await updateToWeb(finalDestination);
+    console.log(`${chalk.greenBright(`
+    DONE!────────────────────────────────────────────────────────────────────────────────────────────────────
+    `)}`);
 
-    "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"
+
 }else{
     //show exit message
     console.log(chalk.gray("Okay, bye."))

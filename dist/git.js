@@ -38,7 +38,7 @@ function create_repository(octokit) {
         //----------------------------------------------------------------------
         console.log(JSON.stringify(result));
         //----------------------------------------------------------------------
-        console.log(`Repository ${chalk.yellow(JSON.stringify(answer.repo_name))} created successfully!`);
+        console.log(`Repository ${chalk.yellow(result.data.full_name)} created successfully!`);
     });
 }
 function cloneRepo(repoExists = false, username = '', repo = '', branch = 'master') {

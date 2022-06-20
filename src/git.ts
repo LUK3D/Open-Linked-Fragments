@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import chalk from 'chalk';
 import child_process from 'child_process';
-
+import { GitEesponse } from "./types/gitresponse";
 /**
  * ## CREATE REPOSITORY
  * Function Create new Repository
@@ -25,11 +25,9 @@ async function create_repository(octokit){
         auto_init: true
     }
     console.log("Creating new Repository, please wait");
-    let result = await octokit.repos.createForAuthenticatedUser(reposConfig);
+    let result:GitEesponse = await octokit.repos.createForAuthenticatedUser(reposConfig);
     //----------------------------------------------------------------------
-        console.log(JSON.stringify(result));
-    //----------------------------------------------------------------------
-    console.log(`Repository ${chalk.yellow(JSON.stringify(answer.repo_name))} created successfully!`)
+    console.log(`Repository ${chalk.yellow(result.data.full_name)} created successfully!`)
 
 }
 

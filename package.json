@@ -1,0 +1,40 @@
+{
+  "name": "open-linked-fragments",
+  "version": "1.0.0",
+  "description": "With this, you can use your github as a cloud storage",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node ./src/index.js init"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LUK3D/Open-Linked-Fragments.git"
+  },
+  "keywords": [
+    "Github",
+    "Storage",
+    "compression",
+    "encryption"
+  ],
+  "author": "luk3d",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LUK3D/Open-Linked-Fragments/issues"
+  },
+  "homepage": "https://github.com/LUK3D/Open-Linked-Fragments#readme",
+  "dependencies": {
+    "@octokit/rest": "^18.12.0",
+    "chalk": "^5.0.1",
+    "clear": "^0.1.0",
+    "commander": "^9.3.0",
+    "configstore": "^6.0.0",
+    "dotenv": "^16.0.1",
+    "figlet": "^1.5.2",
+    "glob": "^8.0.3",
+    "inquirer": "^9.0.0",
+    "node-localstorage": "^2.2.1",
+    "simple-git": "^3.8.0"
+  }
+}

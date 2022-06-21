@@ -3,7 +3,6 @@ import {Octokit} from '@octokit/rest';
 import { LocalStorage } from "node-localstorage";
 
 
-
 /**
  * # Authenticate
  * This function runs to authenticate the user using the Github Access Token

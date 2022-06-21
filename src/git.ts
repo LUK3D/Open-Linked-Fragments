@@ -4,6 +4,8 @@ import child_process from 'child_process';
 import { GitResponse } from "./types/gitresponse";
 import { LocalStorage } from "node-localstorage";
 import path from 'path';
+import fse from "fs-extra";
+
 let localStorage = new LocalStorage('./storage');
 /**
  * ## CREATE REPOSITORY
@@ -58,7 +60,6 @@ async function doFragment () {
         validate: function(value) {
 
             return true;
-            
            if (value === path.basename(value)) {
                return true;
             } else return 'Enter a valid file path';
@@ -83,10 +84,55 @@ async function updateToWeb (path='') {
 }
 
 
+/**
+ * ## Download Specific File/Dir From github
+ */
+ async function download (fileUrl:string, destination='') {
+    let filename = fileUrl.split("/")[fileUrl.split("/").length-1];
+
+    if(fileUrl.length==0){
+        console.log(`Invalid URL`);
+        return null;
+    }
+
+    console.log("FILENAME: " + filename);
+
+
+    let final_folder = destination+"\\"+filename;
+
+    await fse.mkdirSync(final_folder);
+
+    var folder = fileUrl.split("tree")[0];
+
+    if(fileUrl.split("tree").length>1){
+        folder = fileUrl.split("tree")[1];
+    }
+    let myName = fileUrl.split("tree")[1].split("/");
+    myName.shift();
+    myName.shift();
+    console.log("MYNAME:", myName);
+    let repoName = fileUrl.split("tree")[0].split("/")[fileUrl.split("tree")[0].split("/").length-1];
+    let splited = fileUrl.split("tree")[0].trim().split('/');
+    console.log(splited);
+    let completeName = final_folder+"\\"+repoName+(splited[splited.length-1] ==""?splited[splited.length-2]:splited[splited.length-1]);
+
+    //Initializing new Repo
+    console.log(`Cloning Respository... ${completeName}`);//Trocado
+    await child_process.execSync(`git clone --filter=blob:none --no-checkout --depth 1 --sparse ${fileUrl.split("tree")[0]}`,{cwd:final_folder});
+    await child_process.execSync(`git sparse-checkout init --cone`,{cwd:completeName});
+    await child_process.execSync(`git sparse-checkout add ${myName.join('/')}`,{cwd:completeName});
+    await child_process.execSync(`git checkout`,{cwd:completeName});
+    console.log(`Repository created at: ${chalk.yellow(final_folder)}`);
+
+    return `${final_folder}`;
+}
+
+
 
 export{
     create_repository,
     cloneRepo,
     updateToWeb,
-    doFragment
+    doFragment,
+    download
 }

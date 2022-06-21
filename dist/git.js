@@ -12,7 +12,9 @@ import chalk from 'chalk';
 import child_process from 'child_process';
 import { LocalStorage } from "node-localstorage";
 import path from 'path';
-import fse from "fs-extra";
+import gh from "github-url-to-object";
+import fetch from "node-fetch";
+import * as fs from 'fs';
 let localStorage = new LocalStorage('./storage');
 /**
  * ## CREATE REPOSITORY
@@ -95,36 +97,45 @@ function updateToWeb(path = '') {
 /**
  * ## Download Specific File/Dir From github
  */
-function download(fileUrl, destination = '') {
+function download(fileUrl, destination = '', octokit) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        let filename = fileUrl.split("/")[fileUrl.split("/").length - 1];
-        if (fileUrl.length == 0) {
-            console.log(`Invalid URL`);
-            return null;
+        const data = gh(fileUrl);
+        data.folder = data.https_url.split(data.clone_url)[1];
+        if (data.https_url.includes(data.branch)) {
+            var tmp = data.folder.split(data.branch);
+            data.folder = (_a = ((tmp.length > 1) ? tmp[1] : tmp[0])) !== null && _a !== void 0 ? _a : '';
         }
-        console.log("FILENAME: " + filename);
-        let final_folder = destination + "\\" + filename;
-        yield fse.mkdirSync(final_folder);
-        var folder = fileUrl.split("tree")[0];
-        if (fileUrl.split("tree").length > 1) {
-            folder = fileUrl.split("tree")[1];
-        }
-        let myName = fileUrl.split("tree")[1].split("/");
-        myName.shift();
-        myName.shift();
-        console.log("MYNAME:", myName);
-        let repoName = fileUrl.split("tree")[0].split("/")[fileUrl.split("tree")[0].split("/").length - 1];
-        let splited = fileUrl.split("tree")[0].trim().split('/');
-        console.log(splited);
-        let completeName = final_folder + "\\" + repoName + (splited[splited.length - 1] == "" ? splited[splited.length - 2] : splited[splited.length - 1]);
-        //Initializing new Repo
-        console.log(`Cloning Respository... ${completeName}`); //Trocado
-        yield child_process.execSync(`git clone --filter=blob:none --no-checkout --depth 1 --sparse ${fileUrl.split("tree")[0]}`, { cwd: final_folder });
-        yield child_process.execSync(`git sparse-checkout init --cone`, { cwd: completeName });
-        yield child_process.execSync(`git sparse-checkout add "${myName.join('/')}" > .git/info/sparse-checkout `, { cwd: completeName });
-        yield child_process.execSync(`git checkout`, { cwd: completeName });
-        console.log(`Repository created at: ${chalk.yellow(final_folder)}`);
-        return `${final_folder}`;
+        const repoContent = yield octokit.rest.repos.getContent({
+            owner: data.user,
+            repo: data.repo,
+            path: data.folder
+        });
+        var files = repoContent.data.map(function (file) {
+            if (file.name.includes('.js')) {
+                return { link: `https://raw.githubusercontent.com/${data.user}/${data.repo}/${data.branch}/${file.path}`, name: file.name };
+            }
+        });
+        // console.log('Files found at root level', files);
+        files.forEach(function (file) {
+            return __awaiter(this, void 0, void 0, function* () {
+                if (file) {
+                    fetch(file.link)
+                        .then(res => res.blob())
+                        .then(blob => {
+                        saveAs(blob, destination + '\\' + file.name);
+                    });
+                }
+            });
+        });
+        return `${octokit}`;
+    });
+}
+function saveAs(contet, filename) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // var buffer =  Buffer.from(contet)
+        let buffer = Buffer.from(yield contet.text());
+        fs.createWriteStream(filename).write(buffer);
     });
 }
 export { create_repository, cloneRepo, updateToWeb, doFragment, download };

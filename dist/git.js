@@ -121,7 +121,7 @@ function download(fileUrl, destination = '') {
         console.log(`Cloning Respository... ${completeName}`); //Trocado
         yield child_process.execSync(`git clone --filter=blob:none --no-checkout --depth 1 --sparse ${fileUrl.split("tree")[0]}`, { cwd: final_folder });
         yield child_process.execSync(`git sparse-checkout init --cone`, { cwd: completeName });
-        yield child_process.execSync(`git sparse-checkout add ${myName.join('/')}`, { cwd: completeName });
+        yield child_process.execSync(`git sparse-checkout add "${myName.join('/')}" > .git/info/sparse-checkout `, { cwd: completeName });
         yield child_process.execSync(`git checkout`, { cwd: completeName });
         console.log(`Repository created at: ${chalk.yellow(final_folder)}`);
         return `${final_folder}`;

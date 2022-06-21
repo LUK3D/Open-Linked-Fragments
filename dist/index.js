@@ -48,7 +48,7 @@ const question1 = [{
 const answer1 = await inquirer.prompt(question1);
 if (answer1.opeation == "Download") {
     const question = [{
-            name: 'file_path',
+            name: 'file_url',
             type: 'input',
             message: 'File Url:',
             validate: function (value) {
@@ -75,7 +75,9 @@ if (answer1.opeation == "Download") {
             }
         }];
     const answer2 = await inquirer.prompt(destination);
-    await download(answer.file_path, answer2.destination);
+    download(answer.file_url, answer2.destination, (e) => {
+        console.log(e);
+    });
     console.log(`${chalk.greenBright(`
     DONE!────────────────────────────────────────────────────────────────────────────────────────────────────
     `)}`);

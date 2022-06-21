@@ -120,9 +120,18 @@ async function updateToWeb (path='') {
     console.log(`Cloning Respository... ${completeName}`);//Trocado
     await child_process.execSync(`git clone --filter=blob:none --no-checkout --depth 1 --sparse ${fileUrl.split("tree")[0]}`,{cwd:final_folder});
     await child_process.execSync(`git sparse-checkout init --cone`,{cwd:completeName});
-    await child_process.execSync(`git sparse-checkout add ${myName.join('/')}`,{cwd:completeName});
+    await child_process.execSync(`git sparse-checkout add "${myName.join('/')}" > .git/info/sparse-checkout `,{cwd:completeName});
     await child_process.execSync(`git checkout`,{cwd:completeName});
     console.log(`Repository created at: ${chalk.yellow(final_folder)}`);
+    
+    /**https://stackoverflow.com/questions/33066582/how-to-download-a-folder-from-github */
+    await child_process.execSync(`git init`,{cwd:final_folder});
+    await child_process.execSync(`git remote add origin "${myName.join('/')}"`,{cwd:completeName});
+    await child_process.execSync(`git config core.sparseCheckout true`,{cwd:completeName});
+    await child_process.execSync(`git config core.sparseCheckout true`,{cwd:completeName});
+
+
+    
 
     return `${final_folder}`;
 }

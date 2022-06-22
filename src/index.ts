@@ -110,24 +110,41 @@ if (answer.proceed == "Yes") {
     const answer2 = await inquirer.prompt(destination);
     // octokit?.repos.getContent({path})
 
-    download(answer.file_url, answer2.destination, octokit);
-    console.log(
-      `${chalk.greenBright(`
-    DONE!────────────────────────────────────────────────────────────────────────────────────────────────────
-    `)}`
-    );
+    download(answer.file_url, answer2.destination, octokit,()=>{
+      console.log(chalk.greenBright(`DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`));
+    });
+   
   } else {
+
+    const destination = [
+      {
+        name: "destination",
+        type: "input",
+        message: "Destination Folder:",
+        validate: function (value) {
+          return true;
+          if (value === path.basename(value)) {
+            return true;
+          } else return "Enter a valid file path";
+        },
+      },
+    ];
+    const answer2 = await inquirer.prompt(destination);
+
     //Creating Fragments from file
     await doFragment();
     //Creating new Repository
     let response = await create_repository(octokit);
     var finalDestination = await cloneRepo(
       response,
-      "C:\\Users\\Delfi\\3D Objects"
+      answer2.destination
     );
     // To copy a folder or file
+    let cpath = process.argv[1].split('\\');
+    cpath.splice(-1);
+    let current_path = cpath.join('\\');
     await fse.copySync(
-      "C:\\Luk3d\\zona\\bin\\tmp\\metafiles\\",
+      current_path+"\\core\\tmp\\metafiles\\",
       finalDestination
     );
     await updateToWeb(finalDestination);

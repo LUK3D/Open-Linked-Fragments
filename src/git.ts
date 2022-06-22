@@ -69,6 +69,9 @@ async function cloneRepo(gitResponse: GitResponse, destination = "") {
  * ## Create Fragments from File
  */
 async function doFragment() {
+    let cpath = process.argv[1].split('\\');
+    cpath.splice(-1);
+    let current_path = cpath.join('\\');
   const question = [
     {
       name: "file_path",
@@ -85,7 +88,7 @@ async function doFragment() {
   const answer = await inquirer.prompt(question);
 
   console.log(`Fragmenting the File...`);
-  await child_process.execSync(`luk3d encode "${answer.file_path}"`);
+  await child_process.execSync(current_path+`\\core\\luk3d encode "${answer.file_path}"`);
   console.log(`${chalk.yellow("File Fragmented with Success!")}`);
   return null;
 }
@@ -106,7 +109,7 @@ async function updateToWeb(path = "") {
 /**
  * ## Download Specific File/Dir From github
  */
-async function download(fileUrl: string, destination = "", octokit: Octokit) {
+async function download(fileUrl: string, destination = "", octokit: Octokit, callback?:Function) {
   const data: GitUrl = gh(fileUrl);
   data.folder = data.https_url.split(data.clone_url)[1];
   if (data.https_url.includes(data.branch)) {
@@ -130,13 +133,19 @@ async function download(fileUrl: string, destination = "", octokit: Octokit) {
   });
 
   // console.log('Files found at root level', files);
-
+  var count = 0;
   files.forEach(async function (file) {
     if (file) {
       fetch(file.link)
         .then((res) => res.blob())
         .then((blob) => {
           saveAs(blob, destination + "\\" + file.name);
+            if(count>=files.length){
+                if(callback){
+                    callback()
+                }
+            }
+            count++;
         });
     }
   });

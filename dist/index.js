@@ -117,21 +117,27 @@ if (answer.proceed == "Yes") {
             },
         ];
         const answer2 = await inquirer.prompt(destination);
-        //Creating Fragments from file
-        await doFragment();
-        //Creating new Repository
-        let response = await create_repository(octokit);
-        var finalDestination = await cloneRepo(response, answer2.destination);
-        // To copy a folder or file
-        let cpath = process.argv[1].split('\\');
-        cpath.splice(-1);
-        let current_path = cpath.join('\\');
-        await fse.copySync(current_path + "\\core\\tmp\\metafiles\\", finalDestination);
-        await updateToWeb(finalDestination);
-        console.log(`${chalk.greenBright(`
-        DONE!────────────────────────────────────────────────────────────────────────────────────────────────────
-        `)}`);
-        //wget https://raw.githubusercontent.com/username/reponame/path/to/file
+        let response;
+        var user = await octokit.users.getAuthenticated();
+        var res = await (octokit === null || octokit === void 0 ? void 0 : octokit.repos.get({ repo: answer2.destination, owner: user.data.login }));
+        if (res) {
+            response = res;
+            console.log("Response", response);
+        }
+        else {
+            //Creating Fragments from file
+            await doFragment();
+            //Creating new Repository
+            let response = await create_repository(octokit);
+            var finalDestination = await cloneRepo(response, answer2.destination);
+            // To copy a folder or file
+            let cpath = process.argv[1].split('\\');
+            cpath.splice(-1);
+            let current_path = cpath.join('\\');
+            await fse.copySync(current_path + "\\core\\tmp\\metafiles\\", finalDestination);
+            await updateToWeb(finalDestination);
+            console.log(`${chalk.greenBright(`DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`)}`);
+        }
     }
 }
 else {

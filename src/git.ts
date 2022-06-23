@@ -153,9 +153,15 @@ async function download(fileUrl: string, destination = "", octokit: Octokit, cal
   return `${octokit}`;
 }
 
+
 async function saveAs(contet, filename) {
   let buffer = Buffer.from(await contet.text());
   fs.createWriteStream(filename).write(buffer);
 }
 
+
+
+// function clearTemps(path:string){
+//     fs.rmSync();
+// }
 export { create_repository, cloneRepo, updateToWeb, doFragment, download };

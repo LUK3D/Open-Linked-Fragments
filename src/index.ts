@@ -12,6 +12,7 @@ import {
   updateToWeb,
 } from "./git.js";
 import fse from "fs-extra";
+import { GitResponse } from "./types/gitresponse.js";
 
 var _app = new app.Command("init")
   .description("Run CLI tool")
@@ -110,12 +111,14 @@ if (answer.proceed == "Yes") {
     const answer2 = await inquirer.prompt(destination);
     // octokit?.repos.getContent({path})
 
-    download(answer.file_url, answer2.destination, octokit,()=>{
-      console.log(chalk.greenBright(`DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`));
+    download(answer.file_url, answer2.destination, octokit, () => {
+      console.log(
+        chalk.greenBright(
+          `DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`
+        )
+      );
     });
-   
   } else {
-
     const destination = [
       {
         name: "destination",
@@ -131,30 +134,38 @@ if (answer.proceed == "Yes") {
     ];
     const answer2 = await inquirer.prompt(destination);
 
+    let response: GitResponse;
+
+    var user = await octokit.users.getAuthenticated();
+    var res = await octokit?.repos.get({
+      repo: answer2.destination,
+      owner: user.data.login,
+    });
+
+    if (res) {
+      response = res;
+      console.log("Response", response);
+    } else {
+      //Creating new Repository
+      response = await create_repository(octokit);
+    }
     //Creating Fragments from file
     await doFragment();
-    //Creating new Repository
-    let response = await create_repository(octokit);
-    var finalDestination = await cloneRepo(
-      response,
-      answer2.destination
-    );
+    var finalDestination = await cloneRepo(response, answer2.destination);
     // To copy a folder or file
-    let cpath = process.argv[1].split('\\');
+    let cpath = process.argv[1].split("\\");
     cpath.splice(-1);
-    let current_path = cpath.join('\\');
+    let current_path = cpath.join("\\");
     await fse.copySync(
-      current_path+"\\core\\tmp\\metafiles\\",
+      current_path + "\\core\\tmp\\metafiles\\",
       finalDestination
     );
     await updateToWeb(finalDestination);
     console.log(
-      `${chalk.greenBright(`
-        DONE!────────────────────────────────────────────────────────────────────────────────────────────────────
-        `)}`
+      `${chalk.greenBright(
+        `DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`
+      )}`
     );
-
-    //wget https://raw.githubusercontent.com/username/reponame/path/to/file
   }
 } else {
   //show exit message

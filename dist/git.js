@@ -154,4 +154,7 @@ function saveAs(contet, filename) {
         fs.createWriteStream(filename).write(buffer);
     });
 }
+// function clearTemps(path:string){
+//     fs.rmSync();
+// }
 export { create_repository, cloneRepo, updateToWeb, doFragment, download };

@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/LUK3D/Open-Linked-Fragments#readme",
   "dependencies": {
-    "@octokit/rest": "^18.12.0",
+    "@octokit/rest": "^19.0.3",
     "chalk": "^5.0.1",
     "clear": "^0.1.0",
     "commander": "^9.3.0",
@@ -53,6 +53,7 @@
     "@types/figlet": "^1.5.4",
     "@types/inquirer": "^8.2.1",
     "ts-node": "^10.8.1",
+    "tsconfig-paths": "^4.0.0",
     "typescript": "^4.7.4"
   }
 }

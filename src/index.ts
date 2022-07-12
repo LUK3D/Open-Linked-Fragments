@@ -1,44 +1,49 @@
+//@ts-ignore
 import * as app from "commander";
+//@ts-ignore
 import chalk from "chalk";
 import clear from "clear";
 import figlet from "figlet";
 import inquirer from "inquirer";
 import { authenticate } from "./auth.js";
-import {
-  cloneRepo,
-  create_repository,
-  doFragment,
-  download,
-  updateToWeb,
-} from "./git.js";
-import fse from "fs-extra";
+// import {
+//   cloneRepo,
+//   create_repository,
+//   doFragment,
+//   download,
+//   updateToWeb,
+// } from "./git.js";
+// import fse from "fs-extra";
 import { GitResponse } from "./types/gitresponse.js";
+import { Download } from "./downloads.js";
+import { Upload } from "./uploads.js";
 
-var _app = new app.Command("init")
-  .description("Run CLI tool")
-  .action(async () => {
-    //show welcome message
-    console.log("Welcome to Open Linked Fragments CLI");
-  });
+async function Run() {
+  var _app = new app.Command("init")
+    .description("Run CLI tool")
+    .action(async () => {
+      //show welcome message
+      console.log("Welcome to Open Linked Fragments CLI");
+    });
 
-_app.parse(process.argv); //get the arg (i.e. init)
+  _app.parse(process.argv); //get the arg (i.e. init)
 
-//show help if no arg is passed
-if (!_app.args.length) {
-  _app.help();
-}
+  //show help if no arg is passed
+  if (!_app.args.length) {
+    _app.help();
+  }
 
-clear(); //clears the terminal
+  clear(); //clears the terminal
 
-//display app title
-console.log(
-  chalk.greenBright(
-    figlet.textSync("Linked Fragments", { horizontalLayout: "full" })
-  )
-);
-console.log(
-  chalk.greenBright(
-    `
+  //display app title
+  console.log(
+    chalk.greenBright(
+      figlet.textSync("Linked Fragments", { horizontalLayout: "full" })
+    )
+  );
+  console.log(
+    chalk.greenBright(
+      `
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                     Author:Filipe Lukebana (LUK3D)                                          |
 |                                           Date: 19/06/2022                                                  |
@@ -46,24 +51,11 @@ console.log(
 |                                              Version: 0.1                                                   │
 └─────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 `
-  )
-);
+    )
+  );
 
-console.log("Welcome to " + chalk.yellow("Open Linked Fragments"));
+  console.log("Welcome to " + chalk.yellow("Open Linked Fragments"));
 
-const question = [
-  {
-    name: "proceed",
-    type: "input",
-    message: "Proceed to create a Github repo?",
-    choices: ["Yes", "No"],
-    default: "Yes",
-  },
-];
-
-const answer = await inquirer.prompt(question);
-
-if (answer.proceed == "Yes") {
   //proceed with Github authentication
   console.log(chalk.gray("Authenticating..."));
   const octokit = await authenticate();
@@ -73,101 +65,17 @@ if (answer.proceed == "Yes") {
       name: "opeation",
       type: "input",
       message: "What do you want to do?",
-      choices: ["Upload", "Download"],
+      choices: ["u", "d"],
       default: "Upload",
     },
   ];
 
   const answer1 = await inquirer.prompt(question1);
   if (answer1.opeation == "Download") {
-    const question = [
-      {
-        name: "file_url",
-        type: "input",
-        message: "File Url:",
-        validate: function (value) {
-          return true;
-          if (value === path.basename(value)) {
-            return true;
-          } else return "Enter a valid file path";
-        },
-      },
-    ];
-    const answer = await inquirer.prompt(question);
-
-    const destination = [
-      {
-        name: "destination",
-        type: "input",
-        message: "Destination Folder:",
-        validate: function (value) {
-          return true;
-          if (value === path.basename(value)) {
-            return true;
-          } else return "Enter a valid file path";
-        },
-      },
-    ];
-    const answer2 = await inquirer.prompt(destination);
-    // octokit?.repos.getContent({path})
-
-    download(answer.file_url, answer2.destination, octokit, () => {
-      console.log(
-        chalk.greenBright(
-          `DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`
-        )
-      );
-    });
+    Upload(octokit);
   } else {
-    const destination = [
-      {
-        name: "destination",
-        type: "input",
-        message: "Destination Folder:",
-        validate: function (value) {
-          return true;
-          if (value === path.basename(value)) {
-            return true;
-          } else return "Enter a valid file path";
-        },
-      },
-    ];
-    const answer2 = await inquirer.prompt(destination);
-
-    let response: GitResponse;
-
-    var user = await octokit.users.getAuthenticated();
-    var res = await octokit?.repos.get({
-      repo: answer2.destination,
-      owner: user.data.login,
-    });
-
-    if (res) {
-      response = res;
-      console.log("Response", response);
-    } else {
-      //Creating new Repository
-      response = await create_repository(octokit);
-    }
-    //Creating Fragments from file
-    await doFragment();
-    var finalDestination = await cloneRepo(response, answer2.destination);
-    // To copy a folder or file
-    let cpath = process.argv[1].split("\\");
-    cpath.splice(-1);
-    let current_path = cpath.join("\\");
-    await fse.copySync(
-      current_path + "\\core\\tmp\\metafiles\\",
-      finalDestination
-    );
-    await updateToWeb(finalDestination);
-    console.log(
-      `${chalk.greenBright(
-        `DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`
-      )}`
-    );
+    Download(octokit);
   }
-} else {
-  //show exit message
-  console.log(chalk.gray("Okay, bye."));
 }
+
+Run();

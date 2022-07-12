@@ -8,29 +8,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import inquirer from 'inquirer';
+//@ts-ignore
 import { Octokit } from '@octokit/rest';
+//@ts-ignore
 import { LocalStorage } from "node-localstorage";
 /**
  * # Authenticate
  * This function runs to authenticate the user using the Github Access Token
  * @returns
  */
-function authenticate() {
+//@ts-ignore
+function authenticate(dontseach = false) {
     return __awaiter(this, void 0, void 0, function* () {
         //1. try getting a token
         let localStorage = new LocalStorage('./storage');
         let token = localStorage.getItem('GITHUB_TOKEN');
         //2. if it exists, authenticate with it
-        if (token) {
-            console.log("Token is found in config. Skipping prompt.");
-            try {
-                const octokit = new Octokit({
-                    auth: token,
-                });
-                return octokit;
+        if (token && !dontseach) {
+            console.log("Old Token found in config.");
+            const question1 = [
+                {
+                    name: "operation",
+                    type: "input",
+                    message: "Do you want to use the old token?",
+                    choices: ["Y", "N"],
+                    default: "Y",
+                },
+            ];
+            const answer1 = yield inquirer.prompt(question1);
+            if (answer1.operation == "N") {
+                return yield authenticate(true);
             }
-            catch (error) {
-                throw error;
+            else {
+                try {
+                    const octokit = new Octokit({
+                        auth: token,
+                    });
+                    return octokit;
+                }
+                catch (error) {
+                    throw error;
+                }
             }
         }
         else {
@@ -38,7 +56,7 @@ function authenticate() {
             const question = [{
                     name: 'token',
                     type: 'input',
-                    message: 'Enter your Github personal access token.',
+                    message: 'Enter your Github personal access token:',
                     validate: function (value) {
                         if (value.length == 40) {
                             return true;

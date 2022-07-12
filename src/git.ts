@@ -1,12 +1,17 @@
 import inquirer from "inquirer";
+//@ts-ignore
 import chalk from "chalk";
 import child_process from "child_process";
 import { GitResponse } from "./types/gitresponse";
+//@ts-ignore
 import { LocalStorage } from "node-localstorage";
 import path from "path";
+//@ts-ignore
 import gh from "github-url-to-object";
 import { GitUrl } from "./types/giturl";
+//@ts-ignore
 import { Octokit } from "@octokit/rest";
+//@ts-ignore
 import fetch from "node-fetch";
 import * as fs from "fs";
 
@@ -15,13 +20,13 @@ let localStorage = new LocalStorage("./storage");
  * ## CREATE REPOSITORY
  * Function Create new Repository
  */
-async function create_repository(octokit) {
+async function create_repository(octokit:any) {
   const question = [
     {
       name: "repo_name",
       type: "input",
       message: "Give a name to this Repository.",
-      validate: function (value) {
+      validate: function (value:string) {
         if (value.length > 5) {
           return true;
         } else return "The name must have more then 4 characters.";
@@ -62,6 +67,9 @@ async function cloneRepo(gitResponse: GitResponse, destination = "") {
       destination + "/" + gitResponse.data.full_name
     )}`
   );
+
+  await fs.writeFileSync(`${destination + "/" + gitResponse.data.full_name+ "/" + gitResponse.data.full_name}.olf`,`{"filename":"Teste basico"}`);
+
   return `${destination}/${gitResponse.data.full_name}`;
 }
 
@@ -77,6 +85,7 @@ async function doFragment() {
       name: "file_path",
       type: "input",
       message: "File to be Uploaded (absolute file name including extension):",
+      //@ts-ignore
       validate: function (value) {
         return true;
         if (value === path.basename(value)) {
@@ -88,7 +97,13 @@ async function doFragment() {
   const answer = await inquirer.prompt(question);
 
   console.log(`Fragmenting the File...`);
-  await child_process.execSync(current_path+`\\core\\luk3d encode "${answer.file_path}"`);
+  await child_process.execSync(current_path+`\\core luk-fragments fgm "${answer.file_path}"`);
+
+
+  
+
+
+
   console.log(`${chalk.yellow("File Fragmented with Success!")}`);
   return null;
 }
@@ -122,7 +137,7 @@ async function download(fileUrl: string, destination = "", octokit: Octokit, cal
     repo: data.repo,
     path: data.folder,
   });
-
+//@ts-ignore
   var files = repoContent.data.map(function (file) {
     if (file.name.includes(".js")) {
       return {
@@ -134,11 +149,12 @@ async function download(fileUrl: string, destination = "", octokit: Octokit, cal
 
   // console.log('Files found at root level', files);
   var count = 0;
-  files.forEach(async function (file) {
+  
+  files.forEach(async function (file:any) {
     if (file) {
       fetch(file.link)
-        .then((res) => res.blob())
-        .then((blob) => {
+        .then((res:any) => res.blob())
+        .then((blob:any) => {
           saveAs(blob, destination + "\\" + file.name);
             if(count>=files.length){
                 if(callback){
@@ -154,7 +170,7 @@ async function download(fileUrl: string, destination = "", octokit: Octokit, cal
 }
 
 
-async function saveAs(contet, filename) {
+async function saveAs(contet:any, filename:string) {
   let buffer = Buffer.from(await contet.text());
   fs.createWriteStream(filename).write(buffer);
 }

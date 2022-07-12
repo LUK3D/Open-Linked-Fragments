@@ -8,11 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import inquirer from "inquirer";
+//@ts-ignore
 import chalk from "chalk";
 import child_process from "child_process";
+//@ts-ignore
 import { LocalStorage } from "node-localstorage";
 import path from "path";
+//@ts-ignore
 import gh from "github-url-to-object";
+//@ts-ignore
 import fetch from "node-fetch";
 import * as fs from "fs";
 let localStorage = new LocalStorage("./storage");
@@ -57,6 +61,7 @@ function cloneRepo(gitResponse, destination = "") {
         console.log(`Cloning Respository...`);
         yield child_process.execSync(`git clone https://${gitResponse.data.owner.login}:${token}@github.com/${gitResponse.data.full_name}.git "${destination}/${gitResponse.data.full_name}"`);
         console.log(`Repository created at: ${chalk.yellow(destination + "/" + gitResponse.data.full_name)}`);
+        yield fs.writeFileSync(`${destination + "/" + gitResponse.data.full_name + "/" + gitResponse.data.full_name}.olf`, `{"filename":"Teste basico"}`);
         return `${destination}/${gitResponse.data.full_name}`;
     });
 }
@@ -73,6 +78,7 @@ function doFragment() {
                 name: "file_path",
                 type: "input",
                 message: "File to be Uploaded (absolute file name including extension):",
+                //@ts-ignore
                 validate: function (value) {
                     return true;
                     if (value === path.basename(value)) {
@@ -85,7 +91,7 @@ function doFragment() {
         ];
         const answer = yield inquirer.prompt(question);
         console.log(`Fragmenting the File...`);
-        yield child_process.execSync(current_path + `\\core\\luk3d encode "${answer.file_path}"`);
+        yield child_process.execSync(current_path + `\\core luk-fragments fgm "${answer.file_path}"`);
         console.log(`${chalk.yellow("File Fragmented with Success!")}`);
         return null;
     });
@@ -118,6 +124,7 @@ function download(fileUrl, destination = "", octokit, callback) {
             repo: data.repo,
             path: data.folder,
         });
+        //@ts-ignore
         var files = repoContent.data.map(function (file) {
             if (file.name.includes(".js")) {
                 return {

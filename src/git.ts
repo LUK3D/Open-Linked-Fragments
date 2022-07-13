@@ -56,21 +56,51 @@ async function create_repository(octokit:any) {
 /**
  * ## CLONE THE CREATED REPOSITORY
  */
-async function cloneRepo(gitResponse: GitResponse, destination = "") {
+async function cloneRepo(gitResponse: GitResponse, destination = "", filename:string) {
   let token = localStorage.getItem("GITHUB_TOKEN");
-  console.log(`Cloning Respository...`);
+
+  let finalDestination= `${destination}/${gitResponse.data.full_name.split('/')[1]}`;
+  console.log(`Cloning Respository at: ${finalDestination}`);
+
+await fs.mkdir(finalDestination, { recursive: true }, (err) => {
+    if (err) throw err;
+});
+
+
   await child_process.execSync(
-    `git clone https://${gitResponse.data.owner.login}:${token}@github.com/${gitResponse.data.full_name}.git "${destination}/${gitResponse.data.full_name}"`
+    `git clone https://${gitResponse.data.owner.login}:${token}@github.com/${gitResponse.data.full_name}.git "${finalDestination}"`,
+    {cwd:finalDestination}
   );
+  
+  
+
+// child_process.execSync('git clone repolink', {
+//   stdio: [0, 1, 2], // we need this so node will print the command output
+//   cwd: path.resolve(__dirname, ''), // path to where you want to save the file
+// })
+
+
+  
+  
   console.log(
     `Repository created at: ${chalk.yellow(
-      destination + "/" + gitResponse.data.full_name
+      finalDestination
     )}`
   );
 
-  await fs.writeFileSync(`${destination + "/" + gitResponse.data.full_name+ "/" + gitResponse.data.full_name}.olf`,`{"filename":"Teste basico"}`);
 
-  return `${destination}/${gitResponse.data.full_name}`;
+
+
+
+
+  let fileExtention = filename.split('\\')[filename.split('\\').length-1];
+  if(filename.split('/').length>1){
+    fileExtention = filename.split('/')[filename.split('/').length-1];
+  }
+  
+  await fs.writeFileSync(`${finalDestination}\\${finalDestination.split('/')[1]}.meta.olf`,`{"filename":"${fileExtention}", "remote":"${gitResponse.data.full_name}"}`);
+
+  return `${finalDestination}`;
 }
 
 /**
@@ -97,7 +127,7 @@ async function doFragment() {
   const answer = await inquirer.prompt(question);
 
   console.log(`Fragmenting the File...`);
-  await child_process.execSync(current_path+`\\core luk-fragments fgm "${answer.file_path}"`);
+  await child_process.execSync(`luk-fragments fgm "${answer.file_path}"`,{cwd:`${current_path}\\core`});
 
 
   
@@ -105,7 +135,7 @@ async function doFragment() {
 
 
   console.log(`${chalk.yellow("File Fragmented with Success!")}`);
-  return null;
+  return answer.file_path;
 }
 
 /**

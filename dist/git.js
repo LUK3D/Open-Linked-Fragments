@@ -55,14 +55,27 @@ function create_repository(octokit) {
 /**
  * ## CLONE THE CREATED REPOSITORY
  */
-function cloneRepo(gitResponse, destination = "") {
+function cloneRepo(gitResponse, destination = "", filename) {
     return __awaiter(this, void 0, void 0, function* () {
         let token = localStorage.getItem("GITHUB_TOKEN");
-        console.log(`Cloning Respository...`);
-        yield child_process.execSync(`git clone https://${gitResponse.data.owner.login}:${token}@github.com/${gitResponse.data.full_name}.git "${destination}/${gitResponse.data.full_name}"`);
-        console.log(`Repository created at: ${chalk.yellow(destination + "/" + gitResponse.data.full_name)}`);
-        yield fs.writeFileSync(`${destination + "/" + gitResponse.data.full_name + "/" + gitResponse.data.full_name}.olf`, `{"filename":"Teste basico"}`);
-        return `${destination}/${gitResponse.data.full_name}`;
+        let finalDestination = `${destination}/${gitResponse.data.full_name.split('/')[1]}`;
+        console.log(`Cloning Respository at: ${finalDestination}`);
+        yield fs.mkdir(finalDestination, { recursive: true }, (err) => {
+            if (err)
+                throw err;
+        });
+        yield child_process.execSync(`git clone https://${gitResponse.data.owner.login}:${token}@github.com/${gitResponse.data.full_name}.git "${finalDestination}"`, { cwd: finalDestination });
+        // child_process.execSync('git clone repolink', {
+        //   stdio: [0, 1, 2], // we need this so node will print the command output
+        //   cwd: path.resolve(__dirname, ''), // path to where you want to save the file
+        // })
+        console.log(`Repository created at: ${chalk.yellow(finalDestination)}`);
+        let fileExtention = filename.split('\\')[filename.split('\\').length - 1];
+        if (filename.split('/').length > 1) {
+            fileExtention = filename.split('/')[filename.split('/').length - 1];
+        }
+        yield fs.writeFileSync(`${finalDestination}\\${finalDestination.split('/')[1]}.meta.olf`, `{"filename":"${fileExtention}", "remote":"${gitResponse.data.full_name}"}`);
+        return `${finalDestination}`;
     });
 }
 /**
@@ -91,9 +104,9 @@ function doFragment() {
         ];
         const answer = yield inquirer.prompt(question);
         console.log(`Fragmenting the File...`);
-        yield child_process.execSync(current_path + `\\core luk-fragments fgm "${answer.file_path}"`);
+        yield child_process.execSync(`luk-fragments fgm "${answer.file_path}"`, { cwd: `${current_path}\\core` });
         console.log(`${chalk.yellow("File Fragmented with Success!")}`);
-        return null;
+        return answer.file_path;
     });
 }
 /**

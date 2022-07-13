@@ -3,6 +3,7 @@ import chalk from "chalk";
 import clear from "clear";
 import figlet from "figlet";
 import inquirer from "inquirer";
+import * as fs from "fs";
 import {
   cloneRepo,
   create_repository,
@@ -54,17 +55,35 @@ export async function Download(octokit:any){
         //Creating new Repository
         response = await create_repository(octokit);
       }
+
+       // To copy a folder or file
+       let cpath = process.argv[1].split("\\");
+       cpath.splice(-1);
+       let current_path = cpath.join("\\");
+
+
+      await fs.mkdir(current_path + "\\core\\tmp\\", { recursive: true }, async (err) => {
+        if (err) throw err;
+      });
+
       //Creating Fragments from file
-      await doFragment();
-      var finalDestination = await cloneRepo(response, answer2.destination);
-      // To copy a folder or file
-      let cpath = process.argv[1].split("\\");
-      cpath.splice(-1);
-      let current_path = cpath.join("\\");
+      let filename = await doFragment();
+      var finalDestination = await cloneRepo(response, answer2.destination,filename);
+      
+     
       await fse.copySync(
-        current_path + "\\core\\tmp\\metafiles\\",
+        current_path + "\\core\\tmp\\",
         finalDestination
       );
+      // console.log('Creating Temp Files...')
+
+      // await fse.move(current_path + "\\core\\tmp\\", finalDestination, { overwrite: false }, (err:any) => {
+      //   if (err) return console.error(err)
+      //   console.log('success!')
+      // })
+
+      
+
       await updateToWeb(finalDestination);
       console.log(
         `${chalk.greenBright(
@@ -72,3 +91,4 @@ export async function Download(octokit:any){
         )}`
       );
 }
+

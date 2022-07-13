@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 //@ts-ignore
 import chalk from "chalk";
 import inquirer from "inquirer";
+import * as fs from "fs";
 import { cloneRepo, create_repository, doFragment, updateToWeb, } from "./git.js";
 //@ts-ignore
 import fse from "fs-extra";
@@ -49,14 +50,23 @@ export function Download(octokit) {
             //Creating new Repository
             response = yield create_repository(octokit);
         }
-        //Creating Fragments from file
-        yield doFragment();
-        var finalDestination = yield cloneRepo(response, answer2.destination);
         // To copy a folder or file
         let cpath = process.argv[1].split("\\");
         cpath.splice(-1);
         let current_path = cpath.join("\\");
-        yield fse.copySync(current_path + "\\core\\tmp\\metafiles\\", finalDestination);
+        yield fs.mkdir(current_path + "\\core\\tmp\\", { recursive: true }, (err) => __awaiter(this, void 0, void 0, function* () {
+            if (err)
+                throw err;
+        }));
+        //Creating Fragments from file
+        let filename = yield doFragment();
+        var finalDestination = yield cloneRepo(response, answer2.destination, filename);
+        yield fse.copySync(current_path + "\\core\\tmp\\", finalDestination);
+        // console.log('Creating Temp Files...')
+        // await fse.move(current_path + "\\core\\tmp\\", finalDestination, { overwrite: false }, (err:any) => {
+        //   if (err) return console.error(err)
+        //   console.log('success!')
+        // })
         yield updateToWeb(finalDestination);
         console.log(`${chalk.greenBright(`DONE!────────────────────────────────────────────────────────────────────────────────────────────────────`)}`);
     });
